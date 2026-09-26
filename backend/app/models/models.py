@@ -20,7 +20,7 @@ class Pair(Base):
     """Represents a seed prompt paired with two alternative model responses."""
     __tablename__ = "pairs"
 
-    id = Column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True, index=True)
+    id = Column(Integer().with_variant(BigInteger, "postgresql"), primary_key=True, index=True)
     prompt = Column(Text, nullable=False)
     response_a = Column(Text, nullable=False)
     response_b = Column(Text, nullable=False)
@@ -39,8 +39,8 @@ class Label(Base):
     """
     __tablename__ = "labels"
 
-    id = Column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True, index=True)
-    pair_id = Column(BigInteger().with_variant(Integer, "sqlite"), ForeignKey("pairs.id", ondelete="CASCADE"), nullable=False, index=True)
+    id = Column(Integer().with_variant(BigInteger, "postgresql"), primary_key=True, index=True)
+    pair_id = Column(Integer().with_variant(BigInteger, "postgresql"), ForeignKey("pairs.id", ondelete="CASCADE"), nullable=False, index=True)
     annotator_id = Column(String(100), nullable=False, index=True)
     chosen = Column(String(10), nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)

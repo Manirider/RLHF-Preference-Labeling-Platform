@@ -21,18 +21,20 @@ logger = logging.getLogger("rlhf_platform")
 
 def run_migrations():
     """Execute Alembic migrations to align database schema to head."""
-    ini_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "alembic.ini"))
-    if os.path.exists(ini_path):
-        try:
-            logger.info("Applying Alembic database migrations...")
-            cfg = Config(ini_path)
-            # Ensure sqlalchemy.url is set dynamically from environment/settings
-            cfg.set_main_option("sqlalchemy.url", settings.database_url)
-            command.upgrade(cfg, "head")
-            logger.info("Alembic migrations completed successfully.")
-            return
-        except Exception as e:
-            logger.warning(f"Alembic migration encountered an error ({e}); falling back to metadata create_all.")
+    if not str(engine.url).startswith("sqlite"):
+        ini_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "alembic.ini"))
+        if os.path.exists(ini_path):
+            try:
+                logger.info("Applying Alembic database migrations...")
+                cfg = Config(ini_path)
+                alembic_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "alembic"))
+                cfg.set_main_option("script_location", alembic_dir)
+                cfg.set_main_option("sqlalchemy.url", str(engine.url))
+                command.upgrade(cfg, "head")
+                logger.info("Alembic migrations completed successfully.")
+                return
+            except Exception as e:
+                logger.warning(f"Alembic migration encountered an error ({e}); falling back to metadata create_all.")
     Base.metadata.create_all(bind=engine)
     logger.info("Database schema initialized via metadata.create_all.")
 

@@ -20,7 +20,10 @@ def create_resilient_engine(url: str):
             f"Failed to initialize database engine with URL '{url}' ({exc}). "
             f"Falling back to local SQLite engine."
         )
-        fallback_url = "sqlite:///./local_dev.db"
+        import os
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        fallback_path = os.path.join(project_root, "local_dev.db").replace("\\", "/")
+        fallback_url = f"sqlite:///{fallback_path}"
         return create_engine(fallback_url, **get_engine_args(fallback_url))
 
 engine = create_resilient_engine(settings.database_url)
