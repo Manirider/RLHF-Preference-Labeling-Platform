@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+venv/
+.env.local
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Alembic
+# alembic.ini
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/
+
+# Logs
+*.log
+logs/
+
+# Data exports & databases
+*.jsonl
+*.db
+*.sqlite
+*.sqlite3
+
+# Test & lint caches
+.pytest_cache/
+.ruff_cache/

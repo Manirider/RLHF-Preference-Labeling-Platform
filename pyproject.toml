@@ -1,0 +1,22 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP"]
+ignore = [
+    "B008",  # FastAPI Depends and Query parameter defaults
+    "E501",  # Line length in multi-line templates
+]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/*" = ["E402"]
+
+[tool.pytest.ini_options]
+pythonpath = ["backend", "."]
+testpaths = ["backend/tests"]
+addopts = "-v"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+]
