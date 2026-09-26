@@ -1,6 +1,7 @@
 import logging
+import os
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.core.config import settings
@@ -10,17 +11,35 @@ logger = logging.getLogger(__name__)
 def get_engine_args(url: str):
     if url.startswith("sqlite"):
         return {"connect_args": {"check_same_thread": False}}
-    return {"pool_pre_ping": True}
+    return {
+        "pool_pre_ping": True,
+        "connect_args": {"connect_timeout": 5}
+    }
 
 def create_resilient_engine(url: str):
-    try:
+    # Normalize Render / Heroku postgres:// URLs to SQLAlchemy compatible format
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql+psycopg://", 1)
+    elif url.startswith("postgresql://") and "+" not in url.split("://")[0]:
+        url = url.replace("postgresql://", "postgresql+psycopg://", 1)
+
+    if "render.com" in url and "sslmode" not in url:
+        separator = "&" if "?" in url else "?"
+        url = f"{url}{separator}sslmode=require"
+
+    if url.startswith("sqlite"):
         return create_engine(url, **get_engine_args(url))
-    except (ModuleNotFoundError, Exception) as exc:
+
+    try:
+        eng = create_engine(url, **get_engine_args(url))
+        with eng.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return eng
+    except Exception as exc:
         logger.warning(
-            f"Failed to initialize database engine with URL '{url}' ({exc}). "
+            f"Failed to connect to database with URL '{url}' ({exc}). "
             f"Falling back to local SQLite engine."
         )
-        import os
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
         fallback_path = os.path.join(project_root, "local_dev.db").replace("\\", "/")
         fallback_url = f"sqlite:///{fallback_path}"
@@ -36,3 +55,4 @@ def get_db():
         yield db
     finally:
         db.close()
+

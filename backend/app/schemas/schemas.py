@@ -61,3 +61,4 @@ class AnalyticsOut(BaseModel):
 class HealthOut(BaseModel):
     status: str
     database: str
+    error: str | None = None

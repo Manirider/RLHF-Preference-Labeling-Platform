@@ -27,7 +27,7 @@ def health(db: Session = Depends(get_db)):
         logger.error(f"Healthcheck database error: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={"status": "error", "database": "unhealthy"}
+            detail={"status": "error", "database": "unhealthy", "error": str(e)}
         )
 
 @router.get("/pairs/next", response_model=PairOut, summary="Fetch Next Unlabeled Pair for Annotator")

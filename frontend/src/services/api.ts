@@ -1,8 +1,12 @@
 import { Pair, LabelSubmission, AnalyticsData } from '../types';
 
 const rawApiUrl = (import.meta as unknown as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL || '';
-const cleanApiUrl = rawApiUrl.replace(/\/+$/, '');
+let cleanApiUrl = rawApiUrl.trim().replace(/\/+$/, '');
+if (cleanApiUrl && !cleanApiUrl.startsWith('http://') && !cleanApiUrl.startsWith('https://') && !cleanApiUrl.startsWith('/')) {
+  cleanApiUrl = `https://${cleanApiUrl}`;
+}
 const API_BASE = cleanApiUrl ? (cleanApiUrl.endsWith('/api') ? cleanApiUrl : `${cleanApiUrl}/api`) : '/api';
+
 
 export class ApiService {
   private static async handleResponse<T>(res: Response): Promise<T> {
